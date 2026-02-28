@@ -1,0 +1,74 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+  security:
+    user:
+      name: user
+      password: user
+
+
+
+
+scholrforge:
+  auth:
+    jwt:
+      SECRET: ${JWT_SECRET:MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAu1SU1LfVLPHCozMxH2Mo4lgOEePzNm0tRgeLezV6ffAt0gunVTLw7onLRnrq0/IzW7yWR7QkrmBL7jTKEn5u+qKhbwKfBstIs+bMY2Zkp18gnTxKLxoS2tFczGkPLPgizskuemMghRniWaoLcyehkd3qqGElvW/VDL5AaWTg0nLVkjRo9z+40RQzuVaE8AkAFmxZzow3x+VJYKdjykkJ0iT9wCS0DRTXu269V264Vf/3jvredZiKRkgwlL9xNAwxXFg0x/XFw005UWVRIkdgcKWTjpBP2dPwVZ4WWC+9aGVd+Gyn1o0CLelf4rEjGoXbAAEgAqeGUxrcIlbjXfbcmwIDAQAB}
+      ISSUER: ${JWT_ISSUER:dev.akarshmi}
+      ACCESS-TOKEN-TTL: ${JWT_ACCESS_TOKEN_TTL:3600}
+      REFRESH-TOKEN-TTL: ${JWT_REFRESH_TOKEN_TTL:86400}
+      REFRESH-TOKEN-COOKIE-NAME: ${JWT_REFRESH_TOKEN_COOKIE_NAME:refreshToken}
+      COOKIE-SECURE: ${JWT_COOKIE_SECURE:true}
+      HTTPS-ONLY: ${JWT_HTTPS_ONLY:true}
+      COOKIE-SAME-SITE: ${JWT_COOKIE_SAME_SITE:lax}
+      COOKIE-DOMAIN: ${JWT_COOKIE_DOMAIN:localhost}
+
+
+logging:
+  level:
+    # Your application packages
+    dev.akarshmi.scholrforge: DEBUG
+    dev.akarshmi.scholrforge.auth: DEBUG
+    dev.akarshmi.scholrforge.auth.security: TRACE  # Most detailed for security
+
+    # Spring Framework packages
+    org.springframework.web: INFO
+    org.springframework.security: INFO
+    org.springframework.boot: INFO
+
+    # Database logging (set to DEBUG to see SQL queries)
+    org.hibernate.SQL: INFO
+    org.hibernate.type.descriptor.sql: INFO
+
+    # Suppress noisy logs
+    org.springframework.web.servlet.handler.HandlerMappingIntrospector: ERROR
+
+
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %highlight{%-5level} [%thread] %cyan(%logger{36}) - %msg%n%throwable"
+
+    # File logging (optional - uncomment to enable)
+    file:
+      name: logs/scholrforge.log
+      path: logs
+      max-size: 10MB
+      max-history: 7
+
+    # Logback configuration (for more advanced control)
+    logback:
+      rollingpolicy:
+        max-file-size: 10MB
+        max-history: 7
+        total-size-cap: 100MB
