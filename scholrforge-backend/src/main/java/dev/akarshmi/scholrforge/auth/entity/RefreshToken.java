@@ -1,5 +1,6 @@
 package dev.akarshmi.scholrforge.auth.entity;
 
+import dev.akarshmi.scholrforge.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;

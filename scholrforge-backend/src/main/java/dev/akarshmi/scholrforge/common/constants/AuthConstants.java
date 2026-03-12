@@ -1,4 +1,4 @@
-package dev.akarshmi.scholrforge.constants;
+package dev.akarshmi.scholrforge.common.constants;
 
 public final class AuthConstants {
 

@@ -1,4 +1,4 @@
-package dev.akarshmi.scholrforge.auth.entity;
+package dev.akarshmi.scholrforge.user.entity;
 
 public enum Role {
     ADMIN,

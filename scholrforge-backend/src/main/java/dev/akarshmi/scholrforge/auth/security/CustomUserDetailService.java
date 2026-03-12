@@ -1,8 +1,8 @@
 package dev.akarshmi.scholrforge.auth.security;
 
-import dev.akarshmi.scholrforge.constants.AuthConstants;
-import dev.akarshmi.scholrforge.auth.entity.User;
-import dev.akarshmi.scholrforge.auth.repository.UserRepository;
+import dev.akarshmi.scholrforge.common.constants.AuthConstants;
+import dev.akarshmi.scholrforge.user.entity.User;
+import dev.akarshmi.scholrforge.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

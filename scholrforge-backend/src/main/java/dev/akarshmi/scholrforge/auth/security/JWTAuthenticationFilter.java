@@ -1,9 +1,9 @@
 package dev.akarshmi.scholrforge.auth.security;
 
-import dev.akarshmi.scholrforge.constants.AuthConstants;
+import dev.akarshmi.scholrforge.common.constants.AuthConstants;
 import dev.akarshmi.scholrforge.auth.dto.TokenInfo;
 import dev.akarshmi.scholrforge.auth.exception.AuthException;
-import dev.akarshmi.scholrforge.auth.repository.UserRepository;
+import dev.akarshmi.scholrforge.user.repository.UserRepository;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.MalformedJwtException;

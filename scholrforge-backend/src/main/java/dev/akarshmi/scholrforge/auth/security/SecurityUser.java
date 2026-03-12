@@ -1,6 +1,6 @@
 package dev.akarshmi.scholrforge.auth.security;
 
-import dev.akarshmi.scholrforge.auth.entity.User;
+import dev.akarshmi.scholrforge.user.entity.User;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -11,6 +11,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 @Getter
@@ -18,6 +19,7 @@ import java.util.List;
 public class SecurityUser implements UserDetails {
 
     private final User user;
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

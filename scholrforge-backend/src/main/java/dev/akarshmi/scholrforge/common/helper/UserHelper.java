@@ -1,4 +1,4 @@
-package dev.akarshmi.scholrforge.auth.helper;
+package dev.akarshmi.scholrforge.common.helper;
 
 import org.springframework.context.annotation.Bean;
 

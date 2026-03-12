@@ -1,7 +1,7 @@
 package dev.akarshmi.scholrforge.auth.repository;
 
 import dev.akarshmi.scholrforge.auth.entity.RefreshToken;
-import dev.akarshmi.scholrforge.auth.entity.User;
+import dev.akarshmi.scholrforge.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

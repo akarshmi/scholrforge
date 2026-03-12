@@ -1,8 +1,8 @@
-package dev.akarshmi.scholrforge.auth.dto;
+package dev.akarshmi.scholrforge.user.dto;
 
-import dev.akarshmi.scholrforge.auth.entity.Provider;
-import dev.akarshmi.scholrforge.auth.entity.Role;
-import dev.akarshmi.scholrforge.auth.entity.UserStatus;
+import dev.akarshmi.scholrforge.user.entity.Provider;
+import dev.akarshmi.scholrforge.user.entity.Role;
+import dev.akarshmi.scholrforge.user.entity.UserStatus;
 
 import java.time.Instant;
 

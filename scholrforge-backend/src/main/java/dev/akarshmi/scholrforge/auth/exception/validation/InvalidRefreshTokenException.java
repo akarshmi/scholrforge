@@ -1,6 +1,6 @@
 package dev.akarshmi.scholrforge.auth.exception.validation;
 
-import dev.akarshmi.scholrforge.constants.AuthConstants;
+import dev.akarshmi.scholrforge.common.constants.AuthConstants;
 
 public class InvalidRefreshTokenException extends RuntimeException {
     public InvalidRefreshTokenException() {

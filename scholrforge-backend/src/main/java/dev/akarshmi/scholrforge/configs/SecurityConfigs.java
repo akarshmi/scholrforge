@@ -1,8 +1,9 @@
-package dev.akarshmi.scholrforge.auth.configs;
+package dev.akarshmi.scholrforge.configs;
 
-import dev.akarshmi.scholrforge.constants.AuthConstants;
+import dev.akarshmi.scholrforge.common.constants.AuthConstants;
 import dev.akarshmi.scholrforge.auth.security.JWTAuthenticationFilter;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -27,10 +28,10 @@ import java.util.Map;
 
 @Slf4j
 @Configuration
+@RequiredArgsConstructor
 public class SecurityConfigs {
 
-    @Autowired
-    private JWTAuthenticationFilter jwtAuthenticationFilter;
+    private final JWTAuthenticationFilter jwtAuthenticationFilter;
 
     @Bean
     @Order(1)

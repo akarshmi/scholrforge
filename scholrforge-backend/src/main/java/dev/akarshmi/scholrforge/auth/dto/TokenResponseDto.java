@@ -2,7 +2,8 @@ package dev.akarshmi.scholrforge.auth.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import dev.akarshmi.scholrforge.constants.AuthConstants;
+import dev.akarshmi.scholrforge.common.constants.AuthConstants;
+import dev.akarshmi.scholrforge.user.dto.UserResponseDto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;

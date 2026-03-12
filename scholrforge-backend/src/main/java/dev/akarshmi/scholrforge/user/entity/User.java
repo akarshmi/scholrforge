@@ -1,4 +1,4 @@
-package dev.akarshmi.scholrforge.auth.entity;
+package dev.akarshmi.scholrforge.user.entity;
 
 import jakarta.persistence.*;
 import lombok.*;

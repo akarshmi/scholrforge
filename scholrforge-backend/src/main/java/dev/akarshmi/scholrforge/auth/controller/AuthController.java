@@ -2,15 +2,14 @@ package dev.akarshmi.scholrforge.auth.controller;
 
 import dev.akarshmi.scholrforge.auth.dto.*;
 import dev.akarshmi.scholrforge.auth.entity.RefreshToken;
-import dev.akarshmi.scholrforge.auth.entity.User;
+import dev.akarshmi.scholrforge.user.dto.UserResponseDto;
+import dev.akarshmi.scholrforge.user.entity.User;
 import dev.akarshmi.scholrforge.auth.exception.validation.BadCredentialsException;
 import dev.akarshmi.scholrforge.auth.exception.validation.InvalidRefreshTokenException;
-import dev.akarshmi.scholrforge.auth.exception.validation.UserDoesNotExistsException;
-import dev.akarshmi.scholrforge.auth.helper.UserMapperInterface;
+import dev.akarshmi.scholrforge.common.helper.UserMapperInterface;
 import dev.akarshmi.scholrforge.auth.repository.RefreshTokenRepository;
-import dev.akarshmi.scholrforge.auth.security.SecurityUser;
 import dev.akarshmi.scholrforge.auth.serviceImpl.AuthServiceImpl;
-import dev.akarshmi.scholrforge.constants.AuthConstants;
+import dev.akarshmi.scholrforge.common.constants.AuthConstants;
 
 import dev.akarshmi.scholrforge.auth.security.JWTService;
 import dev.akarshmi.scholrforge.auth.service.AuthService;

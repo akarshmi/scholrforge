@@ -1,7 +1,7 @@
 package dev.akarshmi.scholrforge.auth.dto;
 
-import dev.akarshmi.scholrforge.constants.AuthConstants;
-import dev.akarshmi.scholrforge.auth.entity.Provider;
+import dev.akarshmi.scholrforge.common.constants.AuthConstants;
+import dev.akarshmi.scholrforge.user.entity.Provider;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
