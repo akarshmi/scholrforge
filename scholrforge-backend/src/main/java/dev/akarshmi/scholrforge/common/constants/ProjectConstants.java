@@ -9,6 +9,7 @@ package dev.akarshmi.scholrforge.common.constants;
 // PROJECT VALIDATION
   public static final String PROJECT_TITLE_NOT_BLANK = "Project title cannot be blank";
   public static final String PROJECT_TITLE_SIZE = "Project title cannot exceed 150 characters";
+  public static final String PROJECT_TITLE_SIZE_AND_PATTERN = "Project title must be between 3 and 150 characters";
 
   public static final String PROJECT_DESCRIPTION_NOT_BLANK = "Project description cannot be blank";
   public static final String PROJECT_DESCRIPTION_SIZE = "Project description cannot exceed 2000 characters";
@@ -17,6 +18,9 @@ package dev.akarshmi.scholrforge.common.constants;
   public static final String PROJECT_DEMO_URL_INVALID = "Invalid demo URL";
 
   public static final String PROJECT_TECH_STACK_REQUIRED = "Tech stack cannot be empty";
+  public static final String PROJECT_TYPE_REQUIRED = "Project type is required";
+  public static final String PROJECT_DIFFICULTY_LEVEL_REQUIRED = "Difficulty level is required";
+
 
 
 // PROJECT BUSINESS LOGIC
@@ -39,6 +43,8 @@ public static final String PROJECT_CREATED_SUCCESS = "Project created successful
 
   // PROJECT DOWNLOAD / TRENDING
   public static final String PROJECT_DOWNLOAD_RECORDED = "Project download recorded";
+  public static final String PROJECT_DOWNLOAD_URL_SIZE_EXCEEDED = "Project download recorded";
+  public static final String PROJECT_DOWNLOAD_URL_INVALID = "Project download URL is Invalid";
   public static final String PROJECT_TRENDING_FETCH_SUCCESS = "Trending projects retrieved successfully";
 
 // PROJECT GENERIC ERRORS

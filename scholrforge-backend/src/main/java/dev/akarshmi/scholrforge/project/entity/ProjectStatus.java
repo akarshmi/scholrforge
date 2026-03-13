@@ -3,5 +3,6 @@ package dev.akarshmi.scholrforge.project.entity;
 public enum ProjectStatus {
     DRAFT,
     PUBLISHED,
-    ARCHIVED
+    ARCHIVED,
+    UNDER_REVIEW
 }

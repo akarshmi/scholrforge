@@ -1,14 +1,12 @@
 package dev.akarshmi.scholrforge.project.entity;
 
-import dev.akarshmi.scholrforge.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
-import java.util.UUID;
-
+import java.util.*;
 
 @Getter
 @Setter
@@ -19,66 +17,90 @@ import java.util.UUID;
 @Table(
         name = "projects",
         indexes = {
-                @Index(name = "idx_project_slug", columnList = "slug"),
-                @Index(name = "idx_project_title", columnList = "projectTitle"),
-                @Index(name = "idx_project_type", columnList = "projectType"),
-                @Index(name = "idx_project_status", columnList = "status")
+                @Index(name = "idx_project_slug",   columnList = "slug"),
+                @Index(name = "idx_project_title",  columnList = "project_title"),
+                @Index(name = "idx_project_type",   columnList = "project_type"),
+                @Index(name = "idx_project_status", columnList = "status"),
+                @Index(name = "idx_project_user",   columnList = "user_id")
         }
 )
 public class Project {
-
-//    id, user_id, title, slug, description,
-//    project_type, github_url, file_path,
-//    demo_video_url, difficulty_level, semester,
-//    status, view_count, download_count,
-//    avg_rating, created_at, updated_at
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", referencedColumnName = "userId")
-    private User user;
+    // Decoupled from user module — store ID only
+    @Column(name = "user_id", nullable = false)
+    private UUID userId;
 
-
-    @Column(columnDefinition = "TEXT")
-    private String description;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private ProjectType projectType;
-
-    @Column(nullable = false, length = 150)
+    @Column(nullable = false, length = 150, name = "project_title")
     private String projectTitle;
 
     @Column(nullable = false, unique = true, length = 200)
     private String slug;
 
-    @Column(length = 255)
-    private String githubUrl;
-    private String downloadUrl;
+    @Column(columnDefinition = "TEXT")
+    private String description;
 
-    private String demoVideoUrl;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, name = "project_type")
+    private ProjectType projectType;
 
     @Enumerated(EnumType.STRING)
     private DifficultyLevel difficultyLevel;
 
     @Enumerated(EnumType.STRING)
-    private ProjectStatus status;
+    @Builder.Default
+    private ProjectStatus status = ProjectStatus.DRAFT;
 
+    // Links
+    @Column(length = 255)
+    private String githubUrl;
+
+    private String downloadUrl;
+    private String demoVideoUrl;
+
+    // Relations
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "project_tech_stack",
+            joinColumns = @JoinColumn(name = "project_id"),
+            inverseJoinColumns = @JoinColumn(name = "tech_stack_id")
+    )
+    @Builder.Default
+    private Set<TechStack> techStack = new HashSet<>();
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "project_tags",
+            joinColumns = @JoinColumn(name = "project_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id")
+    )
+    @Builder.Default
+    private Set<Tag> tags = new HashSet<>();
+
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("displayOrder ASC")
+    @Builder.Default
+    private List<ProjectMedia> media = new ArrayList<>();
+
+    // Stats
     @Column(nullable = false)
+    @Builder.Default
     private Long viewCount = 0L;
 
     @Column(nullable = false)
+    @Builder.Default
     private Long downloadCount = 0L;
 
+    @Builder.Default
     private Double avgRating = 0.0;
 
     @CreationTimestamp
+    @Column(updatable = false)
     private Instant createdAt;
 
     @UpdateTimestamp
     private Instant updatedAt;
-
 }

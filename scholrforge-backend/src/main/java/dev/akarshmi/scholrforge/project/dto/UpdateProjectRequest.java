@@ -3,14 +3,17 @@ package dev.akarshmi.scholrforge.project.dto;
 import dev.akarshmi.scholrforge.common.constants.ProjectConstants;
 import dev.akarshmi.scholrforge.project.entity.DifficultyLevel;
 import dev.akarshmi.scholrforge.project.entity.ProjectType;
-import jakarta.validation.constraints.*;
-import org.springframework.web.multipart.MultipartFile;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+import org.hibernate.validator.constraints.UUID;
 
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+public record UpdateProjectRequest(
 
-public record CreateProjectRequest(
+        @NotBlank(message = ProjectConstants.PROJECT_NOT_FOUND)
+        String uuid,
+
 
         @NotBlank(message = ProjectConstants.PROJECT_TITLE_NOT_BLANK)
         @Size(min = 3, max = 150, message = ProjectConstants.PROJECT_TITLE_SIZE_AND_PATTERN)
@@ -32,29 +35,16 @@ public record CreateProjectRequest(
         )
         String githubUrl,
 
-        // Either a URL or a file — both optional, validated in service
-        @Pattern(
-                regexp = "^(https?:\\/\\/).+",
-                message = ProjectConstants.PROJECT_DOWNLOAD_URL_INVALID
-        )
-        String downloadUrl,
-
-        MultipartFile projectFile,          // zip, pdf — optional
-
         @Pattern(
                 regexp = "^(https?:\\/\\/).+",
                 message = ProjectConstants.PROJECT_DEMO_URL_INVALID
         )
         String demoVideoUrl,
 
-        // Media — optional during creation
-        List<MultipartFile> mediaFiles,     // images, gifs
+        @Size(max = 255, message = ProjectConstants.PROJECT_DOWNLOAD_URL_SIZE_EXCEEDED)
+        String downloadUrl
 
-        // Tags & TechStack — both optional, both supported
-        Set<UUID> tagIds,                   // existing tags by ID
-        Set<String> newTagNames,            // new tags to create
 
-        Set<UUID> techStackIds,             // existing tech stacks by ID
-        Set<String> newTechStackNames       // new tech stacks to create
 
-) {}
+) {
+}

@@ -20,6 +20,9 @@ public class SecurityUser implements UserDetails {
 
     private final User user;
 
+    public UUID getUserId() {
+        return user.getUserId();
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
