@@ -2,6 +2,7 @@ package dev.akarshmi.scholrforge.project.service;
 
 import dev.akarshmi.scholrforge.auth.security.SecurityUser;
 import dev.akarshmi.scholrforge.common.constants.ProjectConstants;
+import dev.akarshmi.scholrforge.common.helper.ApiResponse;
 import dev.akarshmi.scholrforge.common.helper.ProjectMapper;
 import dev.akarshmi.scholrforge.common.helper.SlugGenerator;
 import dev.akarshmi.scholrforge.project.dto.CreateProjectRequest;
@@ -23,7 +24,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -137,8 +138,10 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public void deleteProject(UUID uuid) {
-
+    public ApiResponse deleteProject(UUID uuid) {
+        Project project = projectRepository.findById(uuid).orElseThrow(() -> new ProjectDoesNotExistsException(ProjectConstants.PROJECT_NOT_FOUND));
+        projectRepository.delete(project);
+        return ApiResponse.of(HttpStatus.ACCEPTED.value(),ProjectConstants.PROJECT_DELETED_SUCCESS);
     }
 
 
@@ -205,7 +208,6 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public List<ProjectDto> getProjectsOf(String username) {
-        User user = userService.findUserByUsername(username);
         Pageable pageable = PageRequest.of(
                 0,
                 10,
@@ -226,13 +228,20 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public List<ProjectDto> getAllProjectsByCreatedDate() {
-       return projectMapper.toProjectDtos(projectRepository.findAllByOrderByCreatedAtDesc());
+    public List<ProjectDto> getAllProjectsByCreatedDate(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return projectMapper.toProjectDtos(projectRepository.findAllByOrderByCreatedAtDesc(pageable));
     }
 
     @Override
     public ProjectDto getById(UUID uuid) {
-        return projectMapper.toProjectDto(projectRepository.findProjectById(uuid));
+        return projectMapper.toProjectDto(projectRepository.findById(uuid).orElseThrow(() -> new ProjectDoesNotExistsException(ProjectConstants.PROJECT_NOT_FOUND)));
     }
 
+    @Override
+    public List<ProjectDto> search(String keyword, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        List<Project> project = projectRepository.findByProjectTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCase(keyword, keyword, pageable);
+        return projectMapper.toProjectDtos(project);
+    }
 }

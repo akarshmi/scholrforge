@@ -13,7 +13,11 @@ import java.util.UUID;
 public interface ProjectRepository extends JpaRepository<Project, UUID> {
     boolean existsBySlug(String slug);
     Page<Project> findByUserId(UUID userId, Pageable pageable);  // fixed
-    List<Project> findAllByOrderByCreatedAtDesc();
+    List<Project> findAllByOrderByCreatedAtDesc(Pageable pageable);
     List<Project> findAllByOrderByUpdatedAtDesc();
-    Project findProjectById(UUID id);
+    List<Project> findByProjectTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
+            String title,
+            String description,
+            Pageable page
+    );
 }
