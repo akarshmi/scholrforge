@@ -1,3 +1,4 @@
+import { Toaster } from 'sonner'
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
@@ -38,6 +39,7 @@ export const viewport = {
   userScalable: true,
 }
 
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -47,6 +49,7 @@ export default function RootLayout({
     <html lang="en" className="dark" suppressHydrationWarning>
       <body className="font-sans antialiased">
         {children}
+        <Toaster position="top-right" richColors />
         <Analytics />
       </body>
     </html>

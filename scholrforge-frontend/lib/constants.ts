@@ -1,10 +1,24 @@
-// API Configuration
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api'
+export const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080/api'
+
+export const APP_URL =
+  process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
+
+export const SESSION_COOKIE = 'scholrforge_session'
+
+export const ROUTES = {
+  login: '/login',
+  feed: '/feed',
+  forbidden: '/403',
+  protected: ['/feed', '/dashboard', '/profile', '/admin'],
+  authOnly: ['/login', '/register'],
+} as const
+
 
 export const DIFFICULTY_LEVELS = [
-  { value: 'beginner', label: 'Beginner' },
-  { value: 'intermediate', label: 'Intermediate' },
-  { value: 'advanced', label: 'Advanced' },
+  { value: 'BEGINNER', label: 'Beginner' },
+  { value: 'INTERMEDIATE', label: 'Intermediate' },
+  { value: 'ADVANCED', label: 'Advanced' },
 ]
 
 export const SEMESTERS = [

@@ -1,6 +1,7 @@
 package dev.akarshmi.scholrforge.project.repository;
 
 import dev.akarshmi.scholrforge.project.entity.Project;
+import dev.akarshmi.scholrforge.project.entity.ProjectStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,7 +13,7 @@ import java.util.UUID;
 @Repository
 public interface ProjectRepository extends JpaRepository<Project, UUID> {
     boolean existsBySlug(String slug);
-    Page<Project> findByUserId(UUID userId, Pageable pageable);  // fixed
+    List<Project> findByUserId(UUID userId, Pageable pageable);  // fixed
     List<Project> findAllByOrderByCreatedAtDesc(Pageable pageable);
     List<Project> findAllByOrderByUpdatedAtDesc();
     List<Project> findByProjectTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
@@ -20,4 +21,8 @@ public interface ProjectRepository extends JpaRepository<Project, UUID> {
             String description,
             Pageable page
     );
+//    Project findBySlugWithinIgnoreCase(String slug);
+    Project findBySlug(String slug);
+
+    List<Project> findByUserIdAndStatus(UUID userId, ProjectStatus status, Pageable pageable);
 }

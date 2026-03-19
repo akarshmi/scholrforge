@@ -72,7 +72,6 @@ public class UserServiceImpl implements UserService {
         if (!userRepository.existsByEmail(uid.toString())) {
             throw new UserDoesNotExistsException(AuthConstants.USER_DOES_NOT_EXISTS);
         }
-
     }
 
     @Override
@@ -88,16 +87,16 @@ public class UserServiceImpl implements UserService {
     @Override
     public Optional<UserResponseDto> getUserByUsername(String username) {
         User user = userRepository.findByUsername(username);
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null) {
-            throw new AccessDeniedException(AuthConstants.UNAUTHORIZED_ACCESS);
-        }
-        if (user == null) {
-            throw new AccessDeniedException(AuthConstants.UNAUTHORIZED_ACCESS);
-        }
-        if (!auth.getName().equals(user.getEmail())){
-            throw new AccessDeniedException(AuthConstants.UNAUTHORIZED_ACCESS);
-        }
+//        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+//        if (auth == null) {
+//            throw new AccessDeniedException(AuthConstants.UNAUTHORIZED_ACCESS);
+//        }
+//        if (user == null) {
+//            throw new AccessDeniedException(AuthConstants.UNAUTHORIZED_ACCESS);
+//        }
+//        if (!auth.getName().equals(user.getEmail())){
+//            throw new AccessDeniedException(AuthConstants.UNAUTHORIZED_ACCESS);
+//        }
         return Optional.ofNullable(userMapperInterface.toResponseDto(user));
     }
 

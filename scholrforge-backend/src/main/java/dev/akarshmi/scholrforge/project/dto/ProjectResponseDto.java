@@ -11,6 +11,7 @@ import java.util.UUID;
 public record ProjectResponseDto(
         UUID id,
         UUID userId,
+        Author author,
         String projectTitle,
         String slug,
         String description,

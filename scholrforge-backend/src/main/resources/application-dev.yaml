@@ -34,6 +34,9 @@ scholrforge:
       HTTPS-ONLY: ${JWT_HTTPS_ONLY:true}
       COOKIE-SAME-SITE: ${JWT_COOKIE_SAME_SITE:lax}
       COOKIE-DOMAIN: ${JWT_COOKIE_DOMAIN:localhost}
+    cors:
+      FRONTEND-URL: ${FRONTEND-URL:http://localhost:3000, http://localhost:5173}
+      MAX-AGE: ${MAX-AGE:3600}
 
 
 logging:

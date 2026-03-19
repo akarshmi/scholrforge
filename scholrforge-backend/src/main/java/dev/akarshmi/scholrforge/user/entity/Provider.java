@@ -6,6 +6,5 @@ public enum Provider{
     GITHUB,
     FACEBOOK,
     APPLE
-
     }
 

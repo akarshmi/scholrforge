@@ -2,6 +2,7 @@ package dev.akarshmi.scholrforge.project.controller;
 
 import dev.akarshmi.scholrforge.common.constants.ProjectConstants;
 import dev.akarshmi.scholrforge.common.helper.ApiResponse;
+import dev.akarshmi.scholrforge.common.helper.ProjectMapper;
 import dev.akarshmi.scholrforge.project.dto.CreateProjectRequest;
 import dev.akarshmi.scholrforge.project.dto.ProjectDto;
 import dev.akarshmi.scholrforge.project.dto.ProjectResponseDto;
@@ -21,6 +22,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ProjectController {
     private final ProjectService projectService;
+    private final ProjectMapper projectMapper;
 
 
     //    POST   /api/projects               # Create new project
@@ -48,6 +50,13 @@ public class ProjectController {
             return ResponseEntity.ok(projectService.getAllProjectsByCreatedDate(page, size));
         }
         return ResponseEntity.ok(projectService.search(keyword,page,size));
+    }
+
+    @GetMapping("/slug/{slug}")
+    public ResponseEntity<ProjectResponseDto> searchProjectBySlug(
+            @PathVariable String slug
+    ) {
+        return ResponseEntity.ok(projectService.findBySlug(slug));
     }
 
 

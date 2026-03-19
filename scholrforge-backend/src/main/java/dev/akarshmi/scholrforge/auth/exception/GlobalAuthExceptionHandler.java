@@ -2,12 +2,17 @@ package dev.akarshmi.scholrforge.auth.exception;
 
 import dev.akarshmi.scholrforge.auth.dto.ErrorResponseDto;
 import dev.akarshmi.scholrforge.auth.exception.validation.*;
+import dev.akarshmi.scholrforge.common.constants.AuthConstants;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.LockedException;
+
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -67,21 +72,28 @@ public class GlobalAuthExceptionHandler {
         return new ResponseEntity<>(error, status);
     }
 
+
+
     @ExceptionHandler({
-            BadCredentialsException.class
+            BadCredentialsException.class,
+            DisabledException.class,
+            LockedException.class
     })
-    public ResponseEntity<ErrorResponseDto> handleBadCredentialsException(RuntimeException ex, HttpServletRequest request){
+    public ResponseEntity<ErrorResponseDto> handleBadCredentialsException(
+            RuntimeException ex, HttpServletRequest request
+    ) {
         HttpStatus status = HttpStatus.UNAUTHORIZED;
         ErrorResponseDto error = new ErrorResponseDto(
-                ex.getMessage(),
+                AuthConstants.INVALID_CREDENTIALS,
                 status.value(),
                 status.getReasonPhrase(),
                 request.getRequestURI(),
                 LocalDateTime.now()
         );
-
         return new ResponseEntity<>(error, status);
     }
+
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponseDto> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex, HttpServletRequest request) {
         HttpStatus status = HttpStatus.BAD_REQUEST;

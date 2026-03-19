@@ -4,7 +4,6 @@ import dev.akarshmi.scholrforge.auth.dto.*;
 import dev.akarshmi.scholrforge.auth.entity.RefreshToken;
 import dev.akarshmi.scholrforge.user.dto.UserResponseDto;
 import dev.akarshmi.scholrforge.user.entity.User;
-import dev.akarshmi.scholrforge.auth.exception.validation.BadCredentialsException;
 import dev.akarshmi.scholrforge.auth.exception.validation.InvalidRefreshTokenException;
 import dev.akarshmi.scholrforge.common.helper.UserMapperInterface;
 import dev.akarshmi.scholrforge.auth.repository.RefreshTokenRepository;
@@ -24,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 

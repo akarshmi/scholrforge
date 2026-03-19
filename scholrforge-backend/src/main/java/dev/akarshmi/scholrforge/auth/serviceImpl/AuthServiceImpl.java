@@ -6,7 +6,6 @@ import dev.akarshmi.scholrforge.auth.dto.TokenResponseDto;
 import dev.akarshmi.scholrforge.user.dto.UserResponseDto;
 import dev.akarshmi.scholrforge.auth.entity.*;
 import dev.akarshmi.scholrforge.auth.exception.validation.*;
-import dev.akarshmi.scholrforge.auth.exception.validation.BadCredentialsException;
 import dev.akarshmi.scholrforge.common.helper.UserMapperInterface;
 import dev.akarshmi.scholrforge.auth.repository.RefreshTokenRepository;
 import dev.akarshmi.scholrforge.user.repository.UserRepository;
@@ -27,6 +26,8 @@ import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.security.authentication.BadCredentialsException;
+
 
 import java.time.Instant;
 import java.util.UUID;
@@ -110,8 +111,6 @@ public class AuthServiceImpl implements AuthService {
             String refreshToken = jwtService.generateRefreshToken(user, jti);
 
 
-
-
             // 6. Return response
             return TokenResponseDto.of(
                     accessToken,
@@ -121,7 +120,7 @@ public class AuthServiceImpl implements AuthService {
             );
 
         } catch (BadCredentialsException e) {
-            log.warn("Failed login attempt for email: {}", dto.email());
+            log.warn(AuthConstants.INVALID_CREDENTIALS);
             throw new BadCredentialsException(AuthConstants.INVALID_CREDENTIALS);
         } catch (DisabledException e) {
             log.warn("Disabled account attempted login: {}", dto.email());
@@ -129,9 +128,10 @@ public class AuthServiceImpl implements AuthService {
         } catch (LockedException e) {
             log.warn("Locked account attempted login: {}", dto.email());
             throw new LockedException("Account is locked");
-        } catch (Exception e) {
-            log.error("Login error for email: {}", dto.email(), e);
-            throw new InternalAuthenticationServiceException("Authentication failed");
+        }
+        catch (Exception e) {
+            log.error("Uncaught Exception", e);
+            throw new InternalAuthenticationServiceException("Uncaught Exception");
         }
     }
 

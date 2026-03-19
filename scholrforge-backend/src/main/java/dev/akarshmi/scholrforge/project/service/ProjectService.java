@@ -6,6 +6,7 @@ import dev.akarshmi.scholrforge.project.dto.ProjectDto;
 import dev.akarshmi.scholrforge.project.dto.ProjectResponseDto;
 import dev.akarshmi.scholrforge.project.dto.UpdateProjectRequest;
 import dev.akarshmi.scholrforge.project.entity.Project;
+import dev.akarshmi.scholrforge.project.entity.ProjectStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
@@ -17,10 +18,11 @@ public interface ProjectService {
     ProjectResponseDto updateProject(UpdateProjectRequest request);
     ApiResponse deleteProject(UUID uuid);
     List<ProjectDto> getProjectsOf(String username);
-    List<ProjectDto> getMyProjects();
+    List<ProjectResponseDto> getMyProjects(UUID userId, int page, int size, String sort);
     List<ProjectDto> getAllProjectsByCreatedDate(int page, int size);
     ProjectDto getById(UUID uuid);
     List<ProjectDto> search(String keyword,int page,int size);
-
+    ProjectResponseDto findBySlug(String slug);
+    List<ProjectResponseDto> getApprovedByUsername(String username,int page,int size);
 
 }

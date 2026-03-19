@@ -1,3 +1,4 @@
+// ── DashboardLayout.tsx ───────────────────────────────────────────────────────
 'use client'
 
 import React from 'react'
@@ -11,24 +12,16 @@ interface DashboardLayoutProps {
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
-    <div className="flex h-screen bg-background">
-      {/* Sidebar */}
+    <div className="flex h-screen bg-background overflow-hidden">
       <Sidebar />
-
-      {/* Main Content */}
-      <div className="flex flex-1 flex-col lg:ml-0 overflow-hidden">
-        {/* Top Bar */}
+      <div className="flex flex-1 flex-col min-w-0 overflow-hidden">
         <TopBar />
-
-        {/* Page Content */}
         <main className="flex-1 overflow-y-auto">
           <div className="flex flex-col min-h-full">
             {children}
           </div>
         </main>
       </div>
-
-      {/* Search Command Palette */}
       <SearchCommand />
     </div>
   )

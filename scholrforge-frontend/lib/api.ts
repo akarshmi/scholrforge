@@ -1,110 +1,134 @@
-import axios, { AxiosInstance, InternalAxiosRequestConfig, AxiosError } from 'axios';
-import { API_BASE_URL } from './constants';
+import axios, {
+  type AxiosInstance,
+  type AxiosError,
+  type InternalAxiosRequestConfig,
+} from 'axios'
+import { useAuthStore } from '@/store/useAuthStore'
+import { APP_URL, API_BASE_URL } from './constants'
 
-// Error types
+// ─── Error Class ──────────────────────────────────────────────────────────────
+
 export class AppError extends Error {
   constructor(
     public statusCode: number,
-    public message: string,
-    public details?: Record<string, any>
+    message: string,
+    public details?: Record<string, unknown>
   ) {
-    super(message);
-    this.name = 'AppError';
+    super(message)
+    this.name = 'AppError'
   }
 }
 
-// Create axios instance
-const api: AxiosInstance = axios.create({
+// ─── Client → Next.js route handlers ─────────────────────────────────────────
+
+export const api: AxiosInstance = axios.create({
+  baseURL: typeof window !== 'undefined' ? window.location.origin : APP_URL,
+  withCredentials: true,
+  headers: { 'Content-Type': 'application/json' },
+})
+
+// ─── Server-side → Spring Boot (no interceptors) ──────────────────────────────
+
+export const springApi: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  withCredentials: true, // Include cookies for JWT auth
-});
+  withCredentials: true,
+  headers: { 'Content-Type': 'application/json' },
+})
 
-// Request interceptor - attach JWT token
+// ─── Request interceptor ──────────────────────────────────────────────────────
+
 api.interceptors.request.use(
-  async (config: InternalAxiosRequestConfig) => {
-    // Get token from localStorage or sessionStorage
-    const token =
-      typeof window !== 'undefined'
-        ? localStorage.getItem('authToken') || sessionStorage.getItem('authToken')
-        : null;
-
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-
-    return config;
+  (config: InternalAxiosRequestConfig) => {
+    const token = useAuthStore.getState().accessToken
+    if (token) config.headers.Authorization = `Bearer ${token}`
+    return config
   },
   (error) => Promise.reject(error)
-);
+)
 
-// Response interceptor - handle errors and token refresh
+// ─── Token refresh queue ──────────────────────────────────────────────────────
+
+let isRefreshing = false
+let failedQueue: Array<{
+  resolve: (token: string) => void
+  reject: (err: unknown) => void
+}> = []
+
+function processQueue(error: unknown, token: string | null): void {
+  failedQueue.forEach(({ resolve, reject }) =>
+    error ? reject(error) : resolve(token!)
+  )
+  failedQueue = []
+}
+
+// ─── Response interceptor ─────────────────────────────────────────────────────
+
 api.interceptors.response.use(
-  (response) => response,
+  (res) => res,
   async (error: AxiosError) => {
-    const originalRequest = error.config as InternalAxiosRequestConfig & {
-      _retry?: boolean;
-    };
+    const original = error.config as InternalAxiosRequestConfig & {
+      _retry?: boolean
+    }
 
-    // Handle 401 - Unauthorized (token expired or invalid)
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
+    if (error.response?.status === 401 && !original._retry) {
+      // ✅ Skip refresh for auth routes — no session exists yet
+      if (original.url?.includes('/api/auth/')) {
+        const data = error.response?.data as Record<string, unknown> | undefined
+        return Promise.reject(
+          new AppError(401, (data?.message as string) ?? 'Invalid email or password', {})
+        )
+      }
+
+      // Queue concurrent 401s
+      if (isRefreshing) {
+        return new Promise<string>((resolve, reject) =>
+          failedQueue.push({ resolve, reject })
+        ).then((token) => {
+          original.headers.Authorization = `Bearer ${token}`
+          return api(original)
+        })
+      }
+
+      original._retry = true
+      isRefreshing = true
 
       try {
-        // Try to refresh token
-        const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {}, {
-          withCredentials: true,
-        });
-
-        const { token } = response.data;
-
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('authToken', token);
-        }
-
-        // Retry original request with new token
-        originalRequest.headers.Authorization = `Bearer ${token}`;
-        return api(originalRequest);
+        const newToken = await useAuthStore.getState().refreshAccessToken()
+        processQueue(null, newToken)
+        original.headers.Authorization = `Bearer ${newToken}`
+        return api(original)
       } catch (refreshError) {
-        // Refresh failed, redirect to login
-        if (typeof window !== 'undefined') {
-          localStorage.removeItem('authToken');
-          sessionStorage.removeItem('authToken');
-          window.location.href = '/login';
-        }
-        return Promise.reject(refreshError);
+        processQueue(refreshError, null)
+        return Promise.reject(refreshError)
+      } finally {
+        isRefreshing = false
       }
     }
 
-    // Normalize error response
-    const statusCode = error.response?.status || 500;
+    // ── Normalize all errors to AppError ──
+    const status = error.response?.status ?? 500
+    const data = error.response?.data as Record<string, unknown> | undefined
     const message =
-      (error.response?.data as any)?.message ||
-      error.message ||
-      'An unexpected error occurred';
-    const details = (error.response?.data as any)?.details || {};
+      (data?.message as string) ??
+      (data?.error as string) ??
+      error.message ??
+      'An unexpected error occurred'
+    const details = (data?.details as Record<string, unknown>) ?? {}
 
-    return Promise.reject(new AppError(statusCode, message, details));
+    return Promise.reject(new AppError(status, message, details))
   }
-);
+)
 
-export default api;
+// ─── Typed request helper ─────────────────────────────────────────────────────
 
-/**
- * Utility function to make API calls with error handling
- */
 export async function makeRequest<T>(
   method: 'get' | 'post' | 'put' | 'patch' | 'delete',
   url: string,
-  data?: any,
-  config?: any
+  data?: unknown,
+  config?: object
 ): Promise<T> {
-  try {
-    const response = await api[method]<T>(url, data, config);
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
+  const response = await api[method]<T>(url, data as never, config)
+  return response.data
 }
+
+export default api

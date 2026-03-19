@@ -7,11 +7,10 @@ export const metadata: Metadata = {
 }
 
 interface ProjectPageProps {
-  params: {
-    id: string
-  }
+  params: Promise<{ id: string }>
 }
 
-export default function ProjectPage({ params }: ProjectPageProps) {
-  return <ProjectDetailContent projectId={params.id} />
+export default async function ProjectPage({ params }: ProjectPageProps) {
+  const { id } = await params
+  return <ProjectDetailContent slug={id} />
 }

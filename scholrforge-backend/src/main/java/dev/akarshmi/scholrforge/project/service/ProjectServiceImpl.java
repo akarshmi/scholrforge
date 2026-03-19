@@ -5,14 +5,11 @@ import dev.akarshmi.scholrforge.common.constants.ProjectConstants;
 import dev.akarshmi.scholrforge.common.helper.ApiResponse;
 import dev.akarshmi.scholrforge.common.helper.ProjectMapper;
 import dev.akarshmi.scholrforge.common.helper.SlugGenerator;
-import dev.akarshmi.scholrforge.project.dto.CreateProjectRequest;
-import dev.akarshmi.scholrforge.project.dto.ProjectResponseDto;
-import dev.akarshmi.scholrforge.project.dto.UpdateProjectRequest;
+import dev.akarshmi.scholrforge.project.dto.*;
 import dev.akarshmi.scholrforge.project.entity.*;
 import dev.akarshmi.scholrforge.project.exceptions.ProjectDoesNotExistsException;
 import dev.akarshmi.scholrforge.project.repository.ProjectMediaRepository;
 import dev.akarshmi.scholrforge.project.repository.ProjectRepository;
-import dev.akarshmi.scholrforge.project.dto.ProjectDto;
 import dev.akarshmi.scholrforge.project.repository.TagRepository;
 import dev.akarshmi.scholrforge.project.repository.TechStackRepository;
 import dev.akarshmi.scholrforge.user.entity.User;
@@ -116,7 +113,7 @@ public class ProjectServiceImpl implements ProjectService {
             projectMediaRepository.saveAll(mediaList);
             savedProject.setMedia(mediaList);
         }
-        return projectMapper.toResponseDto(savedProject);
+        return projectMapper.toDto(savedProject);
 //        return projectMapper.toResponseDto(savedProject);
     }
 
@@ -134,7 +131,7 @@ public class ProjectServiceImpl implements ProjectService {
         updateIfPresent(request.demoVideoUrl(), project::setDemoVideoUrl);
         updateIfPresent(request.downloadUrl(), project::setDownloadUrl);
 
-        return projectMapper.toResponseDto(projectRepository.save(project));
+        return projectMapper.toDto(projectRepository.save(project));
     }
 
     @Override
@@ -219,12 +216,13 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public List<ProjectDto> getMyProjects() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        User user = userRepository.findByEmail(auth.getName());
-        Pageable pageable = PageRequest.of(0,10);
-        Page<Project> projects = projectRepository.findByUserId(user.getUserId(), pageable);
-        return projectMapper.toProjectDtos(projects.getContent());
+    public List<ProjectResponseDto> getMyProjects(UUID userId, int page, int size, String sort) {
+        String[] parts = sort.split(",");
+        Sort s = Sort.by(Sort.Direction.fromString(parts[1]), parts[0]);
+        Pageable pageable = PageRequest.of(page, size, s);
+        return projectMapper.toResponseDtoList(
+                projectRepository.findByUserId(userId, pageable)
+        );
     }
 
     @Override
@@ -243,5 +241,33 @@ public class ProjectServiceImpl implements ProjectService {
         Pageable pageable = PageRequest.of(page, size);
         List<Project> project = projectRepository.findByProjectTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCase(keyword, keyword, pageable);
         return projectMapper.toProjectDtos(project);
+    }
+
+    @Override
+    public ProjectResponseDto findBySlug(String slug) {
+        Project project = projectRepository.findBySlug(slug);
+        // Fetch user from user module
+//        userService.getUserById(project.getUserId().toString());
+        User user = userRepository.findById(project.getUserId())
+                .orElse(null);
+
+        Author author = user != null
+                ? new Author(
+                user.getUserId().toString(),
+                user.getUsername(),
+                user.getName(),
+                user.getAvatarUrl()
+        )
+                : null;
+
+        return projectMapper.toDto(project, author);
+    }
+
+    @Override
+    public List<ProjectResponseDto> getApprovedByUsername(String username, int page, int size) {
+        User user = userRepository.findByUsername(username);
+        Pageable pageable = PageRequest.of(page, size);
+        List<Project> projects = projectRepository.findByUserIdAndStatus(user.getUserId(), ProjectStatus.PUBLISHED, pageable);
+        return projectMapper.toResponseDtoList(projects);
     }
 }

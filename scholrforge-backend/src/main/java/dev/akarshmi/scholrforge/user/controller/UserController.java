@@ -1,14 +1,17 @@
 package dev.akarshmi.scholrforge.user.controller;
 
+import dev.akarshmi.scholrforge.auth.security.SecurityUser;
 import dev.akarshmi.scholrforge.common.constants.UserConstants;
+import dev.akarshmi.scholrforge.project.dto.ProjectResponseDto;
 import dev.akarshmi.scholrforge.project.service.ProjectService;
-import dev.akarshmi.scholrforge.project.dto.ProjectDto;
 import dev.akarshmi.scholrforge.user.dto.UserResponseDto;
 import dev.akarshmi.scholrforge.user.dto.UserUpdateDto;
 import dev.akarshmi.scholrforge.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -31,10 +34,25 @@ public class UserController {
         return ResponseEntity.ok(userService.getUserByUsername(username));
     }
 
+    @GetMapping("/{username}/projects")
+    public ResponseEntity<List<ProjectResponseDto>> getPublicProjects(
+            @PathVariable String username,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return ResponseEntity.ok(projectService.getApprovedByUsername(username,page,size));
+    }
+
 //    GET    /api/users/me/projects      # Get user's projects
     @GetMapping("/me/projects")
-    public ResponseEntity<List<ProjectDto>> myProjects() {
-        return ResponseEntity.ok(projectService.getMyProjects());
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<ProjectResponseDto>> getMyProjects(
+            @AuthenticationPrincipal SecurityUser securityUser,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt,desc") String sort
+    ) {
+        return ResponseEntity.ok(projectService.getMyProjects(securityUser.getUser().getUserId(), page, size, sort));
     }
 
 //    PUT    /api/users/me               # Update own profile
