@@ -76,7 +76,7 @@ export default function ProjectGrid({ filters }: ProjectGridProps) {
 
     const params: Record<string, string> = {
       page: '0',
-      size: '20',
+      size: '10',
       sort: SORT_MAP[filters.sortBy] ?? 'createdAt,desc',
     }
     if (filters.search) params.search = filters.search
@@ -84,7 +84,7 @@ export default function ProjectGrid({ filters }: ProjectGridProps) {
 
     const qs = new URLSearchParams(params).toString()
 
-    springApi.get<Project[]>(`/v4/projects?${qs}`)
+    springApi.get<Project[]>(`/v4/projects/explore`)
       .then(res => {
         if (!cancelled) {
           setProjects(res.data)

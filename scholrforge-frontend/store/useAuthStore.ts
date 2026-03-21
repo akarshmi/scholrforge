@@ -63,7 +63,6 @@ export const useAuthStore = create<AuthState>()(
         })
 
         if (!response.ok) {
-          // ✅ Don't redirect if already on auth page — prevents reload loop
           if (!isAuthPage()) {
             await get().logout()
             if (typeof window !== 'undefined') {
@@ -89,8 +88,14 @@ export const useAuthStore = create<AuthState>()(
       partialize: (state) => ({
         user: state.user,
         accessToken: state.accessToken,
-        isAuthenticated: state.isAuthenticated,
+        // ❌ REMOVED: isAuthenticated — no longer persisted
       }),
+      // ✅ Rehydrate: derive isAuthenticated from user, not from storage
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+          state.isAuthenticated = !!state.user && !!state.accessToken
+        }
+      },
     }
   )
 )

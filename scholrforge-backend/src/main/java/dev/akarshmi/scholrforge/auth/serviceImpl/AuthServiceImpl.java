@@ -167,10 +167,10 @@ public class AuthServiceImpl implements AuthService {
     }
 
     void verifyRegisterRequestDto(RegisterRequestDto dto) {
-        if (userRepository.existsByEmail(dto.email())){
+        if (userRepository.existsByEmail(dto.email().toLowerCase())){
             throw new EmailAlreadyExistsException(AuthConstants.EMAIL_ALREADY_EXISTS);
         }
-        if (userRepository.existsByUsername(dto.username())){
+        if (userRepository.existsByUsername(dto.username().toLowerCase())){
             throw new UsernameAlreadyExistsException(AuthConstants.USERNAME_ALREADY_EXISTS);
         }
     }
@@ -178,8 +178,8 @@ public class AuthServiceImpl implements AuthService {
     User createUser(RegisterRequestDto dto) {
         User user = User.builder()
                 .name(dto.name())
-                .username(dto.username())
-                .email(dto.email())
+                .username(dto.username().toLowerCase())
+                .email(dto.email().toLowerCase())
                 .passwordHash(passwordEncoder.encode(dto.password()))
                 .phone(dto.phone())
                 .emailVerified(false)

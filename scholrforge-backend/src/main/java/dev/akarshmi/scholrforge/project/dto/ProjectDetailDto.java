@@ -24,7 +24,6 @@ public record ProjectDetailDto (
         Long viewCount,
         Long downloadCount,
         Double avgRating,
-        List<ProjectMediaDto> media,
         Set<TagDto> tags,
         Set<TechStackDto> techStack,
         Instant createdAt,

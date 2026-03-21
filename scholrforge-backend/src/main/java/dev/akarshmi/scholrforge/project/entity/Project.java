@@ -30,7 +30,7 @@ public class Project {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    // Decoupled from user module — store ID only
+
     @Column(name = "user_id", nullable = false)
     private UUID userId;
 
@@ -58,7 +58,7 @@ public class Project {
     @Column(length = 255)
     private String githubUrl;
 
-    private String downloadUrl;
+    private String fileName;
     private String demoVideoUrl;
 
     // Relations
@@ -79,11 +79,6 @@ public class Project {
     )
     @Builder.Default
     private Set<Tag> tags = new HashSet<>();
-
-    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
-    @OrderBy("displayOrder ASC")
-    @Builder.Default
-    private List<ProjectMedia> media = new ArrayList<>();
 
     // Stats
     @Column(nullable = false)

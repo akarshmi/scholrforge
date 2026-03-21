@@ -26,7 +26,6 @@ public record ProjectResponseDto(
         Double avgRating,
         Set<TechStackDto> techStack,
         Set<TagDto> tags,
-        List<ProjectMediaDto> media,
         Instant createdAt,
         Instant updatedAt
 ) {}

@@ -1,5 +1,8 @@
 server:
   port: 8080
+  tomcat:
+    max-swallow-size: 220MB
+    max-http-form-post-size: 220MB
 
 spring:
   datasource:
@@ -7,6 +10,19 @@ spring:
     username: ${DB_USER:postgres}
     password: ${DB_PASSWORD:root}
     driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 30000
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 200MB
+      file-size-threshold: 1KB
+      max-request-size: 210MB
+      location: ${FILE_SAVE_LOCATION:C:/scholrforge/upload}
+
+
   jpa:
     hibernate:
       ddl-auto: update
@@ -14,10 +30,10 @@ spring:
     properties:
       hibernate:
         format_sql: true
-  security:
-    user:
-      name: user
-      password: user
+#  security:
+#    user:
+#      name: user
+#      password: user
 
 
 
@@ -57,6 +73,11 @@ logging:
 
     # Suppress noisy logs
     org.springframework.web.servlet.handler.HandlerMappingIntrospector: ERROR
+
+    org.apache.tomcat: DEBUG
+    org.springframework.web.multipart: TRACE
+    org.apache.tomcat.util.http.fileupload: DEBUG
+    org.apache.catalina: DEBUG
 
 
   pattern:

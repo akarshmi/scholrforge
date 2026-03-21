@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -25,4 +26,8 @@ public interface ProjectRepository extends JpaRepository<Project, UUID> {
     Project findBySlug(String slug);
 
     List<Project> findByUserIdAndStatus(UUID userId, ProjectStatus status, Pageable pageable);
+
+    List<Project> findAllByStatus(ProjectStatus status);
+
+    List<Project> findAllByStatusIn(Collection<ProjectStatus> statuses);
 }

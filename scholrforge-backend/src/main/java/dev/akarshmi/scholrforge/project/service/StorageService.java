@@ -7,7 +7,7 @@ import java.util.UUID;
 
 @Service
 public interface StorageService {
-    String uploadProjectFile(MultipartFile multipartFile, UUID userId);
-
+    String uploadProjectFile(MultipartFile file);
     String uploadMedia(MultipartFile file, UUID id);
+    void deleteFile(String fileName);
 }

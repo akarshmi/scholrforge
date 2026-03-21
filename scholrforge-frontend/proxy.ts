@@ -9,7 +9,6 @@ export async function proxy(req: NextRequest) {
     const isProtected = ROUTES.protected.some((r) => pathname.startsWith(r))
     const isAuthRoute = ROUTES.authOnly.some((r) => pathname.startsWith(r))
 
-    // Skip if not a relevant route
     if (!isProtected && !isAuthRoute) return NextResponse.next()
 
     const session = raw ? await verifySessionToken(raw) : null
@@ -23,7 +22,13 @@ export async function proxy(req: NextRequest) {
     }
 
     if (isAuthRoute && isValid) {
-        return NextResponse.redirect(new URL(ROUTES.feed, req.url))
+        // ✅ Only redirect if user is NOT coming from registration
+        const from = req.nextUrl.searchParams.get('from')
+        const isPostRegister = req.headers.get('referer')?.includes('/register')
+
+        if (!isPostRegister) {
+            return NextResponse.redirect(new URL(ROUTES.feed, req.url))
+        }
     }
 
     return NextResponse.next()

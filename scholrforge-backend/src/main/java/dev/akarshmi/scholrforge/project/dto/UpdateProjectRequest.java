@@ -42,7 +42,7 @@ public record UpdateProjectRequest(
         String demoVideoUrl,
 
         @Size(max = 255, message = ProjectConstants.PROJECT_DOWNLOAD_URL_SIZE_EXCEEDED)
-        String downloadUrl
+        String fileName
 
 
 

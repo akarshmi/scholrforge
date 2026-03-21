@@ -11,8 +11,11 @@ import dev.akarshmi.scholrforge.project.service.ProjectService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
@@ -26,10 +29,26 @@ public class ProjectController {
 
 
     //    POST   /api/projects               # Create new project
-    @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ProjectResponseDto createProject(@RequestBody CreateProjectRequest request) {
-       return projectService.createProject(request);
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ProjectResponseDto createProject(@RequestBody CreateProjectRequest request,
+                                            Authentication authentication
+    ) {
+//        System.err.println(request);
+       return projectService.createProject(request, authentication);
+    }
+
+    @PostMapping(
+            value = "/{id}/upload",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
+    public ResponseEntity<ProjectResponseDto> uploadProjectFile(
+            @PathVariable UUID id,
+            @RequestParam("zipFile") MultipartFile zipFile,
+            Authentication authentication
+    ) {
+        ProjectResponseDto response = projectService.uploadProjectFile(id, zipFile, authentication);
+        return ResponseEntity.ok(response);
     }
 
 
@@ -41,7 +60,7 @@ public class ProjectController {
 
 //    GET    /api/projects               # List all projects
     @GetMapping
-    public ResponseEntity<List<ProjectDto>> searchProject(
+    public ResponseEntity<List<ProjectResponseDto>> searchProject(
             @RequestParam(required = false) String keyword,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
@@ -51,6 +70,12 @@ public class ProjectController {
         }
         return ResponseEntity.ok(projectService.search(keyword,page,size));
     }
+
+    @GetMapping("/explore")
+    public ResponseEntity<List<ProjectResponseDto>> explorePage(){
+        return ResponseEntity.ok(projectService.getAllProjectByStatus());
+    }
+
 
     @GetMapping("/slug/{slug}")
     public ResponseEntity<ProjectResponseDto> searchProjectBySlug(

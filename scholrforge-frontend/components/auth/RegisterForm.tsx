@@ -132,7 +132,6 @@ export default function RegisterForm() {
   const [showCpw, setShowCpw] = useState(false)
   const [success, setSuccess] = useState(false)
   const router = useRouter()
-  const { login } = useAuthStore()
 
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -159,24 +158,18 @@ export default function RegisterForm() {
         password: values.password,
       })
 
-      const { user, access_token } = response.data
-      login(user, access_token)
+    setSuccess(true)
+    toast.success('Account created! Please sign in 🎉')
+    setTimeout(() => router.push('/login'), 1200)
 
-      const isSecure = window.location.protocol === 'https:'
-      document.cookie = `isLoggedIn=true; Max-Age=900; SameSite=Strict; ${isSecure ? 'Secure; ' : ''}Path=/`
-
-      setSuccess(true)
-      toast.success('Account created! Welcome to scholrforge 🎉')
-      setTimeout(() => router.push('/feed'), 600)
 
     } catch (error: any) {
       const status = error?.statusCode ?? error?.response?.status
-      const errorMessage =
-        status === 409 ? 'Email or username already exists' :
-          status === 400 ? (error?.message ?? 'Invalid registration data') :
-            status === 429 ? 'Too many attempts. Please wait.' :
-              error?.message ?? 'Failed to create account. Please try again.'
-
+const errorMessage =
+  status === 409 ? 'Email or username already exists' :
+  status === 400 ? 'Invalid registration data' :
+  status === 429 ? 'Too many attempts. Please wait.' :
+  'Something went wrong. Please try again.'
       toast.error(errorMessage)
     } finally {
       setIsLoading(false)

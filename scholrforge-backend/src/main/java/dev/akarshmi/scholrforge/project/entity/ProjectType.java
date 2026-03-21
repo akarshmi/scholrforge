@@ -1,5 +1,7 @@
 package dev.akarshmi.scholrforge.project.entity;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+
 public enum ProjectType {
     WEB,
     MOBILE,
@@ -7,5 +9,10 @@ public enum ProjectType {
     MACHINE_LEARNING,
     DESKTOP,
     EMBEDDED,
-    IOT
+    IOT;
+
+    @JsonCreator
+    public static ProjectType from(String value) {
+        return valueOf(value.trim().toUpperCase());
+    }
 }

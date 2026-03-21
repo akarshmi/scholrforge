@@ -1,14 +1,15 @@
 package dev.akarshmi.scholrforge.project.service;
 
+import dev.akarshmi.scholrforge.auth.exception.validation.UserDoesNotExistsException;
 import dev.akarshmi.scholrforge.auth.security.SecurityUser;
 import dev.akarshmi.scholrforge.common.constants.ProjectConstants;
 import dev.akarshmi.scholrforge.common.helper.ApiResponse;
 import dev.akarshmi.scholrforge.common.helper.ProjectMapper;
 import dev.akarshmi.scholrforge.common.helper.SlugGenerator;
+import dev.akarshmi.scholrforge.common.helper.UserMapperInterface;
 import dev.akarshmi.scholrforge.project.dto.*;
 import dev.akarshmi.scholrforge.project.entity.*;
 import dev.akarshmi.scholrforge.project.exceptions.ProjectDoesNotExistsException;
-import dev.akarshmi.scholrforge.project.repository.ProjectMediaRepository;
 import dev.akarshmi.scholrforge.project.repository.ProjectRepository;
 import dev.akarshmi.scholrforge.project.repository.TagRepository;
 import dev.akarshmi.scholrforge.project.repository.TechStackRepository;
@@ -26,10 +27,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.View;
 
 import java.time.Instant;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -39,86 +42,90 @@ public class ProjectServiceImpl implements ProjectService {
     private final StorageService storageService;
     private final UserRepository userRepository;
     private final ProjectRepository projectRepository;
-    private final ProjectMediaRepository projectMediaRepository;
     private final TechStackRepository techStackRepository;
     private final TagRepository tagRepository;
     private final SlugGenerator slugGenerator;
     private final ProjectMapper projectMapper;
 
 
-
     @Override
     @Transactional
-    public ProjectResponseDto createProject(CreateProjectRequest request) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        UUID userId = ((SecurityUser) auth.getPrincipal()).getUserId();
+    public ProjectResponseDto createProject(CreateProjectRequest request, Authentication authentication) {
+        if (authentication == null || !(authentication.getPrincipal() instanceof SecurityUser user)) {
+            throw new RuntimeException("Invalid authentication");
+        }
+        UUID userId = user.getUserId();
 
         String slug = slugGenerator.generateUniqueSlug(
                 request.projectTitle(),
                 projectRepository::existsBySlug
         );
+        //2. Mapping the tags with tags and techstack with techstack
+        Set<Tag> tags = new HashSet<>();
 
-        // 1. Handle file upload — file takes priority over URL if both provided
-        String downloadUrl = request.downloadUrl();
-        if (request.projectFile() != null && !request.projectFile().isEmpty()) {
-            downloadUrl = storageService.uploadProjectFile(
-                    request.projectFile(), userId
-            );
+        // Existing tags by ID
+        if (request.tagIds() != null && !request.tagIds().isEmpty()) {
+            Set<Tag> existing = tagRepository.findAllByIdIn(request.tagIds());
+            tags.addAll(existing);
         }
 
-        // 2. Resolve tags
-        Set<Tag> tags = resolveTags(request.tagIds(), request.newTagNames());
-
-        // 3. Resolve tech stacks
-        Set<TechStack> techStacks = resolveTechStacks(
-                request.techStackIds(), request.newTechStackNames()
-        );
-
-        // 4. Save project
-        Project savedProject = projectRepository.save(
-                Project.builder()
-                        .userId(userId)
-                        .projectTitle(request.projectTitle())
-                        .description(request.description())
-                        .projectType(request.projectType())
-                        .difficultyLevel(request.difficultyLevel())
-                        .githubUrl(request.githubUrl())
-                        .downloadUrl(downloadUrl)
-                        .demoVideoUrl(request.demoVideoUrl())
-                        .slug(slug)
-                        .status(ProjectStatus.UNDER_REVIEW)
-                        .tags(tags)
-                        .techStack(techStacks)
-                        .createdAt(Instant.now())
-                        .updatedAt(Instant.now())
-                        .build()
-        );
-
-        // 5. Handle optional media uploads
-        if (request.mediaFiles() != null && !request.mediaFiles().isEmpty()) {
-            List<ProjectMedia> mediaList = new ArrayList<>();
-            for (int i = 0; i < request.mediaFiles().size(); i++) {
-                MultipartFile file = request.mediaFiles().get(i);
-                if (file != null && !file.isEmpty()) {
-                    String url = storageService.uploadMedia(file, savedProject.getId());
-                    mediaList.add(ProjectMedia.builder()
-                            .project(savedProject)
-                            .url(url)
-                            .mediaType(resolveMediaType(file.getContentType()))
-                            .displayOrder(i)
-                            .altText(file.getOriginalFilename())
-                            .build());
-                }
+        // New tags — find or create to avoid duplicates
+        if (request.newTagNames() != null && !request.newTagNames().isEmpty()) {
+            for (String name : request.newTagNames()) {
+                Tag tag = tagRepository.findByNameIgnoreCase(name.trim())
+                        .orElseGet(() -> tagRepository.save(
+                                Tag.builder().name(name.trim()).build()
+                        ));
+                tags.add(tag);
             }
-            projectMediaRepository.saveAll(mediaList);
-            savedProject.setMedia(mediaList);
         }
-        return projectMapper.toDto(savedProject);
-//        return projectMapper.toResponseDto(savedProject);
+
+
+        Set<TechStack> techStacks = new HashSet<>();
+
+        // Existing tech stacks by ID
+        if (request.techStackIds() != null && !request.techStackIds().isEmpty()) {
+            Set<TechStack> existing = techStackRepository.findAllByIdIn(request.techStackIds());
+            techStacks.addAll(existing);
+        }
+
+        // New tech stacks — find or create to avoid duplicates
+        if (request.newTechStackNames() != null && !request.newTechStackNames().isEmpty()) {
+            for (String name : request.newTechStackNames()) {
+                TechStack tech = techStackRepository.findByNameIgnoreCase(name.trim())
+                        .orElseGet(() -> techStackRepository.save(
+                                TechStack.builder().name(name.trim()).build()
+                        ));
+                techStacks.add(tech);
+            }
+        }
+
+
+
+        Project project = Project.builder()
+                .userId(userId)
+                .slug(slug)
+                .projectTitle(request.projectTitle())
+                .description(request.description())
+                .projectType(request.projectType())
+                .difficultyLevel(request.difficultyLevel())
+                .githubUrl(request.githubUrl())
+                .demoVideoUrl(request.demoVideoUrl())
+//                .fileName(savedFilePath)
+                .downloadCount(0L)
+                .avgRating(0D)
+                .status(ProjectStatus.UNDER_REVIEW)
+                .tags(tags)
+                .techStack(techStacks)
+                .build();
+
+        Project saved = projectRepository.save(project);
+      return projectMapper.toDto(saved);
     }
 
 
     @Override
+    @Transactional
     public ProjectResponseDto updateProject(UpdateProjectRequest request) {
         Project project = projectRepository.findById(UUID.fromString(request.uuid()))
                 .orElseThrow(()->new ProjectDoesNotExistsException(ProjectConstants.PROJECT_NOT_FOUND));
@@ -129,12 +136,13 @@ public class ProjectServiceImpl implements ProjectService {
 //        updateIfPresent(request.difficultyLevel(), project::setDifficultyLevel);
         updateIfPresent(request.githubUrl(), project::setGithubUrl);
         updateIfPresent(request.demoVideoUrl(), project::setDemoVideoUrl);
-        updateIfPresent(request.downloadUrl(), project::setDownloadUrl);
+        updateIfPresent(request.fileName(), project::setFileName);
 
         return projectMapper.toDto(projectRepository.save(project));
     }
 
     @Override
+    @Transactional
     public ApiResponse deleteProject(UUID uuid) {
         Project project = projectRepository.findById(uuid).orElseThrow(() -> new ProjectDoesNotExistsException(ProjectConstants.PROJECT_NOT_FOUND));
         projectRepository.delete(project);
@@ -195,14 +203,6 @@ public class ProjectServiceImpl implements ProjectService {
         return stacks;
     }
 
-    private MediaType resolveMediaType(String contentType) {
-        if (contentType == null) return MediaType.IMAGE;
-        if (contentType.startsWith("video/")) return MediaType.VIDEO;
-        if (contentType.equals("image/gif")) return MediaType.GIF;
-        return MediaType.IMAGE;
-    }
-
-
     @Override
     public List<ProjectDto> getProjectsOf(String username) {
         Pageable pageable = PageRequest.of(
@@ -226,9 +226,9 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public List<ProjectDto> getAllProjectsByCreatedDate(int page, int size) {
+    public List<ProjectResponseDto> getAllProjectsByCreatedDate(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        return projectMapper.toProjectDtos(projectRepository.findAllByOrderByCreatedAtDesc(pageable));
+        return projectMapper.toResponseDtoList(projectRepository.findAllByOrderByCreatedAtDesc(pageable));
     }
 
     @Override
@@ -237,10 +237,10 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public List<ProjectDto> search(String keyword, int page, int size) {
+    public List<ProjectResponseDto> search(String keyword, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         List<Project> project = projectRepository.findByProjectTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCase(keyword, keyword, pageable);
-        return projectMapper.toProjectDtos(project);
+        return projectMapper.toResponseDtoList(project);
     }
 
     @Override
@@ -269,5 +269,43 @@ public class ProjectServiceImpl implements ProjectService {
         Pageable pageable = PageRequest.of(page, size);
         List<Project> projects = projectRepository.findByUserIdAndStatus(user.getUserId(), ProjectStatus.PUBLISHED, pageable);
         return projectMapper.toResponseDtoList(projects);
+    }
+
+    @Override
+    public List<ProjectResponseDto> getAllProjectByStatus() {
+        return projectMapper.toResponseDtoList(projectRepository.findAllByStatusIn((
+                List.of(ProjectStatus.PUBLISHED, ProjectStatus.UNDER_REVIEW)
+        )));
+
+    }
+
+    @Override
+    @Transactional
+    public ProjectResponseDto uploadProjectFile(UUID projectId, MultipartFile zipFile, Authentication authentication) {
+        if (authentication == null || !(authentication.getPrincipal() instanceof SecurityUser user)) {
+            throw new RuntimeException("Invalid authentication");
+        }
+
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new RuntimeException("Project not found: " + projectId));
+
+        if (!project.getUserId().equals(user.getUserId())) {
+            throw new RuntimeException("You do not have permission to upload files for this project");
+        }
+        if (zipFile == null || zipFile.isEmpty()) {
+            throw new RuntimeException("ZIP file must not be empty");
+        }
+
+        String originalName = zipFile.getOriginalFilename();
+        if (originalName == null || !originalName.toLowerCase().endsWith(".zip")) {
+            throw new RuntimeException("Only .zip files are accepted");
+        }
+        if (project.getFileName() != null) {
+            storageService.deleteFile(project.getFileName());
+        }
+        String savedFileName = storageService.uploadProjectFile(zipFile);
+        project.setFileName(savedFileName);
+        Project saved = projectRepository.save(project);
+        return projectMapper.toDto(saved);
     }
 }

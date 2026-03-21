@@ -11,5 +11,7 @@ import java.util.UUID;
 
 @Repository
 public interface TechStackRepository extends JpaRepository<TechStack, UUID> {
+
+    Set<TechStack> findAllByIdIn(Set<UUID> ids);
     Optional<TechStack> findByNameIgnoreCase(String name);
 }

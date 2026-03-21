@@ -9,52 +9,15 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-
 public record CreateProjectRequest(
-
-        @NotBlank(message = ProjectConstants.PROJECT_TITLE_NOT_BLANK)
-        @Size(min = 3, max = 150, message = ProjectConstants.PROJECT_TITLE_SIZE_AND_PATTERN)
         String projectTitle,
-
-        @NotBlank(message = ProjectConstants.PROJECT_DESCRIPTION_NOT_BLANK)
-        @Size(min = 10, max = 2000, message = ProjectConstants.PROJECT_DESCRIPTION_NOT_BLANK)
         String description,
-
-        @NotNull(message = ProjectConstants.PROJECT_TYPE_REQUIRED)
         ProjectType projectType,
-
-        @NotNull(message = ProjectConstants.PROJECT_DIFFICULTY_LEVEL_REQUIRED)
         DifficultyLevel difficultyLevel,
-
-        @Pattern(
-                regexp = "^(https?:\\/\\/)?(www\\.)?github\\.com\\/.+",
-                message = ProjectConstants.PROJECT_REPOSITORY_URL_INVALID
-        )
         String githubUrl,
-
-        // Either a URL or a file — both optional, validated in service
-        @Pattern(
-                regexp = "^(https?:\\/\\/).+",
-                message = ProjectConstants.PROJECT_DOWNLOAD_URL_INVALID
-        )
-        String downloadUrl,
-
-        MultipartFile projectFile,          // zip, pdf — optional
-
-        @Pattern(
-                regexp = "^(https?:\\/\\/).+",
-                message = ProjectConstants.PROJECT_DEMO_URL_INVALID
-        )
         String demoVideoUrl,
-
-        // Media — optional during creation
-        List<MultipartFile> mediaFiles,     // images, gifs
-
-        // Tags & TechStack — both optional, both supported
-        Set<UUID> tagIds,                   // existing tags by ID
-        Set<String> newTagNames,            // new tags to create
-
-        Set<UUID> techStackIds,             // existing tech stacks by ID
-        Set<String> newTechStackNames       // new tech stacks to create
-
+        Set<UUID> tagIds,
+        Set<String> newTagNames,
+        Set<UUID> techStackIds,
+        Set<String> newTechStackNames
 ) {}

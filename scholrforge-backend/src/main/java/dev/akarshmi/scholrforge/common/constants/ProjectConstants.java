@@ -43,9 +43,10 @@ public static final String PROJECT_CREATED_SUCCESS = "Project created successful
 
   // PROJECT DOWNLOAD / TRENDING
   public static final String PROJECT_DOWNLOAD_RECORDED = "Project download recorded";
-  public static final String PROJECT_DOWNLOAD_URL_SIZE_EXCEEDED = "Project download recorded";
+  public static final String PROJECT_DOWNLOAD_URL_SIZE_EXCEEDED = "Project URL size should not exceed 255 characters.";
   public static final String PROJECT_DOWNLOAD_URL_INVALID = "Project download URL is Invalid";
   public static final String PROJECT_TRENDING_FETCH_SUCCESS = "Trending projects retrieved successfully";
+  public static final String PROJECT_FILE_EXCEEDED = "Project file should not greater than 50MB.";
 
 // PROJECT GENERIC ERRORS
 

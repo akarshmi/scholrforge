@@ -43,7 +43,6 @@ public class SecurityConfigs {
     private final JWTAuthenticationFilter jwtAuthenticationFilter;
 
     @Bean
-    @Order(1)
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
@@ -52,12 +51,14 @@ public class SecurityConfigs {
                 .authorizeHttpRequests( authorizeRequests -> authorizeRequests
                         .requestMatchers("/api/v4/users/me").authenticated()
                         .requestMatchers("/api/v4/users/me/**").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/v4/projects").authenticated()
                         .requestMatchers(AuthConstants.AUTH_BASE_URL+"/register").permitAll()
                         .requestMatchers(AuthConstants.AUTH_BASE_URL+"/refresh").permitAll()
                         .requestMatchers(AuthConstants.AUTH_BASE_URL+"/login").permitAll()
                         .requestMatchers(AuthConstants.AUTH_BASE_URL+"/ping").permitAll()
                         .requestMatchers(AuthConstants.AUTH_BASE_URL+"/logout").permitAll()
                         .requestMatchers(HttpMethod.GET, ProjectConstants.PROJECT_BASE_URL+"/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, ProjectConstants.PROJECT_BASE_URL+"/explore").permitAll()
                         .requestMatchers(HttpMethod.GET,UserConstants.USER_BASE_URL+"/**").permitAll()
                         .anyRequest().authenticated()
                 )

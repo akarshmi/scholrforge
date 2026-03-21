@@ -495,6 +495,7 @@ export default function UserProfileContent({ username }: { username: string }) {
       } else {
         const res = await springApi.get<unknown>(`/v4/users/${username}/projects`)
         setProjects(extractList(res.data))
+        console.log('[UserProfile] fetched projects:', res.data)
       }
     } catch (err) {
       console.error('[UserProfile] projects fetch failed:', err)

@@ -42,7 +42,6 @@ public interface ProjectMapper {
                 dto.avgRating(),
                 dto.techStack(),
                 dto.tags(),
-                dto.media(),
                 dto.createdAt(),
                 dto.updatedAt()
         );
